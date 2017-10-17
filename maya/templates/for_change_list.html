@@ -1,0 +1,18 @@
+<table class="table" border="1" style="border-color: red;" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            {% for col_name in head %}
+                <td>{{ col_name }}</td>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in result %}
+            <tr>
+                {% for col in row %}
+                    <td>{{ col }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -14,11 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url
-from django.contrib import admin
+from maya.service import admin
 
-from maya.service import yy
+from app01 import views
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^maya/', yy.site.urls),
+    # url(r'^admin/', admin.site.urls),
+    url(r'^maya/', admin.site.urls),
+    url(r'^test/', views.test),
 ]

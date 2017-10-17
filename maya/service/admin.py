@@ -1,7 +1,9 @@
 from django.conf.urls import url,include
-from django.shortcuts import HttpResponse
+from django.shortcuts import HttpResponse,render
 
 class MayaAdmin(object):
+
+    list_display = "__all__"
 
     def __init__(self,model_class,site):
         self.model_class = model_class
@@ -20,33 +22,49 @@ class MayaAdmin(object):
 
 
     def changelist_view(self,request):
-        info = self.model_class._meta.app_label, self.model_class._meta.model_name
-        return HttpResponse('%s_%s_changelist'%info)
+        """
+        查询数据
+        """
+        context ={
+            'data_list':self.model_class.objects.all(),
+            'list_display':self.list_display,
+            'maya_admin':self
+        }
+
+        return render(request,'change_list.html',context)
 
     def add_view(self,request):
+        """
+        添加数据
+        """
         info = self.model_class._meta.app_label, self.model_class._meta.model_name
         return HttpResponse('%s_%s_add'%info)
 
     def delete_view(self,request,object_id):
+        """
+        删除数据
+        :param object_id: 数据行id
+        """
         info = self.model_class._meta.app_label, self.model_class._meta.model_name
         return HttpResponse('%s_%s_delete'%info)
 
     def change_view(self,request,object_id):
+        """
+        修改数据
+        :param object_id:数据行id
+        """
         info = self.model_class._meta.app_label, self.model_class._meta.model_name
         return HttpResponse('%s_%s_change'%info)
 
 class MayaSite(object):
-
 
     def __init__(self):
         self._registry = {}
         self.namespace = 'maya'
         self.app_name = 'maya'
 
-
     def register(self,model_class,MayaAdmin=MayaAdmin):
         self._registry[model_class] = MayaAdmin(model_class,self)
-
 
     def get_urls(self):
         urlpatterns = []
@@ -61,6 +79,5 @@ class MayaSite(object):
     @property
     def urls(self):
         return self.get_urls(),self.app_name,self.namespace
-
 
 site = MayaSite()
