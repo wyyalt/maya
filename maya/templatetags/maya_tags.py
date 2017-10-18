@@ -6,27 +6,41 @@ register = Library()
 def format_data_body(data_list,list_display,maya_admin):
     """
     格式化数据行
-    :param data_list:
-    :param list_display:
-    :param maya_admin:
-    :return:
     """
     for row in data_list:
-        # yield [ getattr(row,col_name) for col_name in list_display ]
-        yield [ col_name(maya_admin,row) if isinstance(col_name,FunctionType) else getattr(row,col_name) for col_name in list_display ]
-
-def format_data_head(list_display):
-    ret = []
-    for col_name in list_display:
-        if isinstance(col_name,FunctionType):
-            ret.append(col_name.__name__.title())
+        if list_display == "__all__":
+            yield [str(row),]
         else:
-            ret.append(col_name.title())
+            # yield [ getattr(row,col_name) for col_name in list_display ]
+            yield [ col_name(maya_admin,model_obj=row) if isinstance(col_name,FunctionType) else getattr(row,col_name) for col_name in list_display ]
 
-    return ret
+def format_data_head(list_display,maya_admin):
+    if list_display == "__all__":
+        yield "Objects"
+    else:
+        for name in list_display:
+            yield name(maya_admin,is_header=True) if isinstance(name,FunctionType) else maya_admin.model_class._meta.get_field(name).verbose_name
 
 
 
 @register.inclusion_tag('for_change_list.html')
 def change_list(data_list,list_display,maya_admin):
-    return {'result':format_data_body(data_list,list_display,maya_admin),'head':format_data_head(list_display)}
+    return {'result':format_data_body(data_list,list_display,maya_admin),'head':format_data_head(list_display,maya_admin)}
+
+# 横向显示
+def format_add_data_row(form,maya_admin=None,is_header=False):
+    for item in form:
+        yield maya_admin.model_class._meta.get_field(item.name).verbose_name if is_header else item
+
+# 竖向显示
+def format_add_data_col(form,maya_admin=None):
+    for item in form:
+        yield [ maya_admin.model_class._meta.get_field(item.name).verbose_name,item,item.errors]
+
+
+@register.inclusion_tag('for_add.html')
+def add(form,maya_admin):
+
+    # return {'content':format_add_data_row(form),'head':format_add_data_row(form,maya_admin,is_header=True)}
+    return {'content_col':format_add_data_col(form,maya_admin)}
+

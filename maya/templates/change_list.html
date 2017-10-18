@@ -5,9 +5,35 @@
 <head>
     <meta charset="UTF-8">
     <title>Change_List</title>
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-3.3.7/css/bootstrap.css">
 </head>
 <body>
-<h3>数据列表</h3>
-{% change_list data_list list_display maya_admin %}
+<div class="container">
+    <h3>数据列表</h3>
+    <p class="clearfix"><a href="{{ add_url }}" class="btn btn-info pull-right"><span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span>新增数据</a></p>
+    <!-- data table start -->
+    {% change_list data_list list_display maya_admin %}
+    <!-- data table end -->
+</div>
 </body>
+<script src="/static/jquery/jquery-3.2.1.js"></script>
+<script>
+
+    $(document).ready(function () {
+        $(".first-col").parent().css("width","123")
+    });
+    $("input[type='button']").click(function () {
+        if($(this).val() === "全选"){
+            $("input[type='checkbox']").prop('checked',true)
+        }
+        if($(this).val() === "反选"){
+            $("input[type='checkbox']").each(function () {
+                $(this).prop("checked",!$(this).prop("checked"))
+            })
+        }
+        if($(this).val() === "取消"){
+            $("input[type='checkbox']").prop('checked',false)
+        }
+    })
+</script>
 </html>

@@ -1,0 +1,19 @@
+{% load maya_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add</title>
+    <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-3.3.7/css/bootstrap.css">
+</head>
+<body>
+<div class="container">
+<h3>添加数据</h3>
+<form method="POST" class="form-horizontal" novalidate>
+    {% csrf_token %}
+    {% add form maya_admin %}
+    <input type="submit" value="Submit">
+</form>
+</div>
+</body>
+</html>

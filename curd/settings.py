@@ -124,6 +124,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATIC_FILES = (
-    os.path.join(BASE_DIR,'statics'),
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR,'maya','statics'),
 )
