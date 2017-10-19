@@ -1,0 +1,7 @@
+{% for form in form_list %}
+    {% if form.is_popup %}
+        <p>{{ form.item.field.label }}{{ form.item }}<a href="{{ form.target_url }}">添加</a>{{ form.item.errors.0 }}</p>
+    {% else %}
+        <p>{{ form.item.field.label }}{{ form.item }}{{ form.item.errors.0 }}</p>
+    {% endif %}
+{% endfor %}

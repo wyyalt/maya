@@ -1,4 +1,4 @@
-{% load maya_tags %}
+{% load maya_form_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +11,7 @@
 <h3>添加数据</h3>
 <form method="POST" class="form-horizontal" novalidate>
     {% csrf_token %}
-    {% add form maya_admin %}
+    {%  show_add_edit_form form %}
     <input type="submit" value="Submit">
 </form>
 </div>

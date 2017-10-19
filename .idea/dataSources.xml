@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="db" uuid="d32aed01-fc46-4ad4-9974-75b21e603f29">
+    <data-source source="LOCAL" name="db" uuid="b9136918-9885-4f38-bd6c-f24e095c51aa">
       <driver-ref>19d0997a-8dbc-45f7-a04a-3bcdf9e41c7d</driver-ref>
       <synchronize>true</synchronize>
       <imported>true</imported>
       <remarks>SQLite</remarks>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\wyyal\Desktop\maya\db.sqlite3</jdbc-url>
+      <jdbc-url>jdbc:sqlite:C:\Users\wyyal\Desktop\Progects\maya\db.sqlite3</jdbc-url>
       <driver-properties>
         <property name="enable_load_extension" value="true" />
       </driver-properties>

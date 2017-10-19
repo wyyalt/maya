@@ -68,7 +68,7 @@ class UserInfoAdmin(admin.MayaAdmin):
             return mark_safe("<input type='checkbox' value='{0}'>".format(model_obj.pk))
 
 
-    list_display = (checkbox,'id','username','password',option)
+    list_display = (checkbox,'id','username','password','user_city',option)
 admin.site.register(models.UserInfo,UserInfoAdmin)
 
 class UserGroupAdmin(admin.MayaAdmin):
