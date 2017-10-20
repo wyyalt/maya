@@ -8,4 +8,4 @@ class MayaConfig(AppConfig):
         super(MayaConfig,self).ready()
 
         from django.utils.module_loading import autodiscover_modules
-        autodiscover_modules('admin')
+        autodiscover_modules('maya')

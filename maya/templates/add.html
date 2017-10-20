@@ -9,11 +9,7 @@
 <body>
 <div class="container">
 <h3>添加数据</h3>
-<form method="POST" class="form-horizontal" novalidate>
-    {% csrf_token %}
-    {%  show_add_edit_form form %}
-    <input type="submit" value="Submit">
-</form>
+{%  show_add_edit_form form %}
 </div>
 </body>
 </html>

@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from app01 import models
 from django.http import QueryDict
+from types import FunctionType
 
 
 class UserInfoAdmin(admin.MayaAdmin):
@@ -65,13 +66,49 @@ class UserInfoAdmin(admin.MayaAdmin):
         if is_header:
             return mark_safe(select)
         else:
-            return mark_safe("<input type='checkbox' value='{0}'>".format(model_obj.pk))
+            return mark_safe("<input name='pk' type='checkbox' value='{0}'>".format(model_obj.pk))
 
 
     list_display = (checkbox,'id','username','password','user_city',option)
+
+    def initial(self,request):
+        pk_list = request.POST.getlist('pk')
+        models.UserInfo.objects.filter(pk__in=pk_list).update(password="Swolf927")
+        return True
+
+    def multi_del(self,request):
+        pass
+        return True
+
+
+    initial.text = "初始化"
+    multi_del.text = "批量删除"
+
+    list_action = [initial,multi_del]
+
+    #优化
+    class SearchOption(object):
+        def __init__(self, field_or_func, is_multi):
+            self.field_or_func = field_or_func
+            self.is_multi = is_multi
+
+        @property
+        def is_func(self):
+            if isinstance(self.field_or_func, FunctionType):
+                return True
+
+    list_filter = [
+        SearchOption('username',False),
+        SearchOption('user_group',False),
+    ]
+
+
 admin.site.register(models.UserInfo,UserInfoAdmin)
 
 class UserGroupAdmin(admin.MayaAdmin):
     list_display = ('title',)
 admin.site.register(models.UserGroup,UserGroupAdmin)
 
+class UserCityAdmin(admin.MayaAdmin):
+    list_display = ('title',)
+admin.site.register(models.UserCity,UserCityAdmin)

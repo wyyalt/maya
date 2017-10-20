@@ -1,7 +1,28 @@
-{% for form in form_list %}
-    {% if form.is_popup %}
-        <p>{{ form.item.field.label }}{{ form.item }}<a href="{{ form.target_url }}">添加</a>{{ form.item.errors.0 }}</p>
-    {% else %}
-        <p>{{ form.item.field.label }}{{ form.item }}{{ form.item.errors.0 }}</p>
-    {% endif %}
-{% endfor %}
+
+<form method="POST" class="form-horizontal" novalidate>
+    {% csrf_token %}
+    {% for form in form_list %}
+        {% if form.is_popup %}
+            <p>{{ form.item.field.label }}{{ form.item }}<a style="cursor: pointer" onclick="popup('{{ form.target_url }}')">添加</a>{{ form.item.errors.0 }}</p>
+        {% else %}
+            <p>{{ form.item.field.label }}{{ form.item }}{{ form.item.errors.0 }}</p>
+        {% endif %}
+    {% endfor %}
+    <input type="submit" value="Submit">
+</form>
+<script>
+
+    function popupCallback(popup_dict) {
+        var op = document.createElement("option");
+        op.setAttribute('value',popup_dict.id);
+        op.innerText = popup_dict.content;
+        document.getElementById(popup_dict.popup_id).appendChild(op);
+    }
+
+    function popup(url) {
+        window.open(url,url,"status=1,width:600,height:400,toolbar=0,resizeable=0");
+    }
+
+
+
+</script>

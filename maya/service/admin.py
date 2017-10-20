@@ -70,20 +70,31 @@ from django.conf.urls import url,include
 from django.shortcuts import HttpResponse,render,redirect
 from django.http.request import QueryDict
 from django.urls import reverse
+import json
 
 class MayaAdmin(object):
 
+    #默认显示列
     list_display = "__all__"
+
+    #默认action
+    list_action = []
+
+    #搜索
+    list_filter = []
 
     add_edit_model_from = None
 
     def __init__(self,model_class,site):
         self.model_class = model_class
         self.site = site
+        self.request = None
+        self.app_label = self.model_class._meta.app_label
+        self.model_name = self.model_class._meta.model_name
 
     @property
     def urls(self):
-        info = self.model_class._meta.app_label,self.model_class._meta.model_name
+        info = self.app_label,self.model_name
         urlpatterns = [
             url(r'^$', self.changelist_view, name='%s_%s_changelist' % info),
             url(r'^add/$', self.add_view, name='%s_%s_add' % info),
@@ -123,14 +134,67 @@ class MayaAdmin(object):
             param_dict['change_list_filter'] = request.GET.urlencode()
 
         #添加按钮URL生成
-        base_add_url = reverse("{0}:{1}_{2}_add".format(self.site.namespace,self.model_class._meta.app_label,self.model_class._meta.model_name))
+        base_add_url = reverse("{0}:{1}_{2}_add".format(self.site.namespace,self.app_label,self.model_name))
         add_url = "{0}?{1}".format(base_add_url,param_dict.urlencode())
 
+
+        #分页功能
+        from maya.utils import pagination
+        from copy import deepcopy
+
+        condition = {}
+
+        page_param_dict = deepcopy(request.GET)
+        page_param_dict._mutable = True
+
+        prefix_url = reverse("{0}:{1}_{2}_changelist".format(self.site.namespace,self.app_label,self.model_name))
+        total_num = self.model_class.objects.filter(**condition).count()
+        page_info = pagination.PageInfo(request.GET.get('page'),total_num,prefix_url,page_param_dict,2,10,)
+
+
+        #action
+        action_list = []
+        for action in self.list_action:
+            action_list.append({
+                'name':action.__name__,
+                'text':action.text
+            })
+
+        if request.method == "POST":
+            action_func = request.POST.get('action')
+            ret = getattr(self,action_func)(request)
+            base_url = reverse("{0}:{1}_{2}_changelist".format(self.site.namespace, self.app_label,self.model_name))
+            if ret:
+                base_url = "{0}?{1}".format(base_url,request.GET.urlencode())
+
+            return redirect(base_url)
+
+
+        #组合搜索
+        list_filter = self.list_filter
+        if list_filter:
+            from django.db.models import ManyToManyField,ForeignKey
+            for item in list_filter:
+                if item.is_func:
+                    pass
+                else:
+                    field = self.model_class._meta.get_field(item.field_or_func)
+                    if isinstance(field,ForeignKey):
+                        filter_data_list = field.rel.model.objects.all()
+                    elif isinstance(field,ManyToManyField):
+                        filter_data_list = field.rel.model.objects.all()
+                    else:
+                        print(field.objects.all())
+                        filter_data_list = field.objects.all()
+
+
         context ={
-            'data_list':self.model_class.objects.all(),
+            'data_list':self.model_class.objects.all()[page_info.start:page_info.end],
             'list_display':self.list_display,
             'maya_admin':self,
-            'add_url':add_url
+            'add_url':add_url,
+            'page_index':page_info.page_index,
+            'action_list':action_list
         }
 
         return render(request,'change_list.html',context)
@@ -142,10 +206,21 @@ class MayaAdmin(object):
 
         if request.method == "GET":
             AddModelForm = self.get_add_edit_model_form()()
+
         else:
             AddModelForm = self.get_add_edit_model_form()(data=request.POST,files=request.FILES)
             if AddModelForm.is_valid():
-                AddModelForm.save()
+                obj = AddModelForm.save()
+
+                popup_id = request.GET.get('popup')
+                #popup请求跳转
+                if popup_id:
+
+                    context={
+                        'popup_dict':json.dumps({'popup_id':popup_id,'content':str(obj),'id':obj.pk,})
+                    }
+
+                    return render(request, 'popup_response.html',context)
 
                 # 添加成功中转回list页面
                 base_list_url = reverse("{0}:{1}_{2}_changelist".format(
@@ -161,14 +236,6 @@ class MayaAdmin(object):
             'form':AddModelForm,
             'maya_admin':self,
         }
-
-        # from django.forms.boundfield import BoundField
-        #
-        # print(AddModelForm)
-        # for item in AddModelForm:
-        #     print(self.model_class._meta.get_field(item.name).verbose_name)
-        #     print(type(item))
-        #     print(type(item.errors))
 
         return render(request,'add.html',context)
 
