@@ -137,12 +137,14 @@ class MayaAdmin(object):
         base_add_url = reverse("{0}:{1}_{2}_add".format(self.site.namespace,self.app_label,self.model_name))
         add_url = "{0}?{1}".format(base_add_url,param_dict.urlencode())
 
-
-        #分页功能
+        """
+        分页功能
+        """
         from maya.utils import pagination
         from copy import deepcopy
 
         condition = {}
+        print(request.GET)
 
         page_param_dict = deepcopy(request.GET)
         page_param_dict._mutable = True
@@ -152,7 +154,9 @@ class MayaAdmin(object):
         page_info = pagination.PageInfo(request.GET.get('page'),total_num,prefix_url,page_param_dict,2,10,)
 
 
-        #action
+        """
+        Action
+        """
         action_list = []
         for action in self.list_action:
             action_list.append({
@@ -169,32 +173,34 @@ class MayaAdmin(object):
 
             return redirect(base_url)
 
-
-        #组合搜索
-        list_filter = self.list_filter
-        if list_filter:
-            from django.db.models import ManyToManyField,ForeignKey
-            for item in list_filter:
-                if item.is_func:
-                    pass
+        """
+        组合搜索
+        """
+        from django.db.models import ManyToManyField,ForeignKey
+        from maya.utils.filter import FilterList
+        def get_list_filter():
+            for option in self.list_filter:
+                if option.is_func:
+                    filter_data = option.field_or_func(self,option,request)
                 else:
-                    field = self.model_class._meta.get_field(item.field_or_func)
+                    field = self.model_class._meta.get_field(option.field_or_func)
                     if isinstance(field,ForeignKey):
-                        filter_data_list = field.rel.model.objects.all()
+                        filter_data = FilterList(option,field.rel.model.objects.all(),request)
                     elif isinstance(field,ManyToManyField):
-                        filter_data_list = field.rel.model.objects.all()
+                        filter_data = FilterList(option,field.rel.model.objects.all(),request)
                     else:
-                        print(field.objects.all())
-                        filter_data_list = field.objects.all()
+                        filter_data = FilterList(option, field.model.objects.all(),request)
 
+                yield filter_data
 
         context ={
-            'data_list':self.model_class.objects.all()[page_info.start:page_info.end],
+            'data_list':self.model_class.objects.all(**condition)[page_info.start:page_info.end],
             'list_display':self.list_display,
             'maya_admin':self,
             'add_url':add_url,
             'page_index':page_info.page_index,
-            'action_list':action_list
+            'action_list':action_list,
+            'filter_data_list':get_list_filter()
         }
 
         return render(request,'change_list.html',context)

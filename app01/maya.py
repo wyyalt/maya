@@ -4,7 +4,6 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from app01 import models
 from django.http import QueryDict
-from types import FunctionType
 
 
 class UserInfoAdmin(admin.MayaAdmin):
@@ -55,12 +54,20 @@ class UserInfoAdmin(admin.MayaAdmin):
         :return:
         """
 
-        select = """
+        """
             <div class="btn-group first-col" role="group">
               <input type="button" class="btn btn-default btn-xs" value="全选">
               <input type="button" class="btn btn-default btn-xs" value="反选">
               <input type="button" class="btn btn-default btn-xs" value="取消">
             </div>
+        """
+
+        select = """
+        <div class="option-field">
+            <a style="cursor:pointer;margin-right:3px;" class="check"><span class="glyphicon glyphicon-check" aria-hidden="true"></span>全选</a>
+            <a style="cursor:pointer;margin-right:4px;" class="check"><span class="glyphicon glyphicon-share" aria-hidden="true"></span>反选</a>
+            <a style="cursor:pointer;" class="check"><span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>取消</a>
+        </div>
         """
 
         if is_header:
@@ -81,34 +88,35 @@ class UserInfoAdmin(admin.MayaAdmin):
         return True
 
 
-    initial.text = "初始化"
+    initial.text = "请选择Action"
     multi_del.text = "批量删除"
 
     list_action = [initial,multi_del]
 
-    #优化
-    class SearchOption(object):
-        def __init__(self, field_or_func, is_multi):
-            self.field_or_func = field_or_func
-            self.is_multi = is_multi
 
-        @property
-        def is_func(self):
-            if isinstance(self.field_or_func, FunctionType):
-                return True
+    from maya.utils.filter import SearchOption
+
+    #搜索自定义函数
+    def user_city(self,option,request):
+        from maya.utils.filter import FilterList
+        queryset = models.UserCity.objects.filter(id__lt=3)
+        return FilterList(option,queryset,request)
 
     list_filter = [
-        SearchOption('username',False),
-        SearchOption('user_group',False),
+        SearchOption('username',False,text_func_name="user_pass"),
+        SearchOption('user_group',True),
+        # SearchOption('user_city',False),
+        SearchOption(user_city,False),
+
     ]
 
 
 admin.site.register(models.UserInfo,UserInfoAdmin)
 
 class UserGroupAdmin(admin.MayaAdmin):
-    list_display = ('title',)
+    list_display = ('id','title',)
 admin.site.register(models.UserGroup,UserGroupAdmin)
 
 class UserCityAdmin(admin.MayaAdmin):
-    list_display = ('title',)
+    list_display = ('id','title',)
 admin.site.register(models.UserCity,UserCityAdmin)

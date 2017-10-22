@@ -6,11 +6,41 @@
     <meta charset="UTF-8">
     <title>Change_List</title>
     <link type="text/css" rel="stylesheet" href="/static/plugins/bootstrap-3.3.7/css/bootstrap.css">
+    <style>
+        .list_filter a {
+            display: inline-block;
+            border: 1px solid #dddddd;
+            padding: 5px 10px;
+            margin: 0 10px 10px 0;
+        }
+        .list_filter a.active {
+            background-color: #2aabd2;
+            color: white;
+        }
+        .filter_list {
+            padding-left: 70px;
+        }
+        .filter_all{
+            float: left;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
 
-<h3>数据列表</h3>
+<h1>数据列表</h1>
+<!-- 组合搜索开始 -->
+<div class="list_filter">
+    {% for queryset in filter_data_list %}
+        <div>
+            {% for item in queryset %}
+                {{ item }}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+<!-- 组合搜索结束 -->
+<!-- 组合搜索开始 -->
 <form method="POST">
 {% csrf_token %}
     <div style="margin-bottom: 10px" class="clearfix">
@@ -46,20 +76,21 @@
 <script>
 
     $(document).ready(function () {
-        $(".first-col").parent().css("width","123")
+        $(".option-field").parent().css("width","158")
     });
-    $("input[type='button']").click(function () {
-        if($(this).val() === "全选"){
+    $(".check").click(function () {
+        if($(this).text() === '全选'){
             $("input[type='checkbox']").prop('checked',true)
         }
-        if($(this).val() === "反选"){
-            $("input[type='checkbox']").each(function () {
+        if($(this).text() === '反选'){
+            $("input[type='checkbox']").each(function (){
                 $(this).prop("checked",!$(this).prop("checked"))
             })
         }
-        if($(this).val() === "取消"){
+        if($(this).text() === '取消'){
             $("input[type='checkbox']").prop('checked',false)
         }
+
     })
 </script>
 </html>
